@@ -265,19 +265,31 @@ function initClosing(prefersReducedMotion) {
   const anchor = top || wordmark;
   if (!anchor) return;
 
-  const observer = new IntersectionObserver(
-    (entries) => {
-      entries.forEach((entry) => {
-        if (entry.isIntersecting) {
-          if (top) top.classList.add('is-visible');
-          if (wordmark) wordmark.classList.add('is-visible');
-          observer.unobserve(anchor);
-        }
-      });
-    },
-    { threshold: 0.2 }
-  );
-  observer.observe(anchor);
+  let revealed = false;
+  let ticking = false;
+
+  const check = () => {
+    if (!revealed) {
+      const rect = anchor.getBoundingClientRect();
+      if (rect.top < window.innerHeight * 0.85) {
+        revealed = true;
+        if (top) top.classList.add('is-visible');
+        if (wordmark) wordmark.classList.add('is-visible');
+        window.removeEventListener('scroll', onScroll);
+      }
+    }
+    ticking = false;
+  };
+
+  const onScroll = () => {
+    if (!ticking) {
+      requestAnimationFrame(check);
+      ticking = true;
+    }
+  };
+
+  window.addEventListener('scroll', onScroll, { passive: true });
+  check();
 }
 
 function initNavAutoHide() {
