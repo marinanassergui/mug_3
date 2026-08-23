@@ -779,7 +779,7 @@ a { text-decoration: none; color: inherit; }
 /* ---------------------------------------------------
    Responsive
 --------------------------------------------------- */
-@media (max-width: 768px) {
+@media (max-width: 1024px) {
   :root { --nav-h: 68px; }
 
   .nav-inner { padding: 16px 20px; }
