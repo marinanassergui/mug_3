@@ -198,17 +198,18 @@ function initProcess(prefersReducedMotion) {
     }
   }
 
-  const isMobileLayout = window.matchMedia('(max-width: 768px)').matches;
+  if (cards.length < 2 || prefersReducedMotion) return;
 
   // On mobile the section is a plain stacked layout (see the CSS), not the
   // pinned scroll-swap effect — running the swap JS on top of it fights the
   // mobile CSS (the .is-leaving transform still wins on specificity) and
-  // shifts cards over each other. Skip it entirely there.
-  if (cards.length < 2 || prefersReducedMotion || isMobileLayout) return;
-
+  // shifts cards over each other. The mode is re-checked on every viewport
+  // change (not just once at load) so a width read that was briefly wrong
+  // at page-load time — or a real resize/rotation — can't leave the section
+  // stuck in the wrong mode.
+  const mobileQuery = window.matchMedia('(max-width: 768px)');
   const CARD_VH = 100; // scroll distance per card transition
-  section.style.height = `${(100 + (cards.length - 1) * CARD_VH).toFixed(0)}dvh`;
-
+  let scrollBound = false;
   let ticking = false;
 
   const update = () => {
@@ -226,20 +227,37 @@ function initProcess(prefersReducedMotion) {
     ticking = false;
   };
 
-  window.addEventListener(
-    'scroll',
-    () => {
-      if (!ticking) {
-        requestAnimationFrame(update);
-        ticking = true;
+  const onScroll = () => {
+    if (!ticking) {
+      requestAnimationFrame(update);
+      ticking = true;
+    }
+  };
+
+  const applyLayout = () => {
+    if (mobileQuery.matches) {
+      section.style.height = '';
+      cards.forEach((card) => card.classList.remove('is-active', 'is-leaving'));
+      if (scrollBound) {
+        window.removeEventListener('scroll', onScroll);
+        scrollBound = false;
       }
-    },
-    { passive: true }
-  );
+    } else {
+      section.style.height = `${(100 + (cards.length - 1) * CARD_VH).toFixed(0)}dvh`;
+      if (!scrollBound) {
+        window.addEventListener('scroll', onScroll, { passive: true });
+        scrollBound = true;
+      }
+      update();
+    }
+  };
 
-  window.addEventListener('resize', update);
+  mobileQuery.addEventListener('change', applyLayout);
+  window.addEventListener('resize', () => {
+    if (!mobileQuery.matches) update();
+  });
 
-  update();
+  applyLayout();
 }
 
 function initCases(prefersReducedMotion) {
