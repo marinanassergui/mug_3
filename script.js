@@ -198,7 +198,7 @@ function initProcess(prefersReducedMotion) {
     }
   }
 
-  const isMobileLayout = window.matchMedia('(max-width: 1024px)').matches;
+  const isMobileLayout = window.matchMedia('(max-width: 768px)').matches;
 
   // On mobile the section is a plain stacked layout (see the CSS), not the
   // pinned scroll-swap effect — running the swap JS on top of it fights the
