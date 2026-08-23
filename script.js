@@ -14,6 +14,40 @@ document.addEventListener('DOMContentLoaded', () => {
   initNavAutoHide();
 });
 
+// Reveals `el` (adds the "is-visible" class) once it scrolls within
+// `thresholdFraction` of the viewport height. Driven by a scroll listener +
+// rAF rather than IntersectionObserver, which has proven unreliable for
+// these entrance reveals in the wild.
+function revealOnScroll(el, thresholdFraction) {
+  if (!el) return;
+
+  const fraction = thresholdFraction === undefined ? 0.85 : thresholdFraction;
+  let revealed = false;
+  let ticking = false;
+
+  const check = () => {
+    if (!revealed) {
+      const rect = el.getBoundingClientRect();
+      if (rect.top < window.innerHeight * fraction && rect.bottom > 0) {
+        revealed = true;
+        el.classList.add('is-visible');
+        window.removeEventListener('scroll', onScroll);
+      }
+    }
+    ticking = false;
+  };
+
+  const onScroll = () => {
+    if (!ticking) {
+      requestAnimationFrame(check);
+      ticking = true;
+    }
+  };
+
+  window.addEventListener('scroll', onScroll, { passive: true });
+  check();
+}
+
 function initHeroShowcase(prefersReducedMotion) {
   const caption = document.querySelector('.showcase-caption');
   const heroShowcase = document.querySelector('.hero-showcase');
@@ -160,18 +194,7 @@ function initProcess(prefersReducedMotion) {
     if (prefersReducedMotion) {
       intro.classList.add('is-visible');
     } else {
-      const introObserver = new IntersectionObserver(
-        (entries) => {
-          entries.forEach((entry) => {
-            if (entry.isIntersecting) {
-              intro.classList.add('is-visible');
-              introObserver.unobserve(intro);
-            }
-          });
-        },
-        { threshold: 0.3 }
-      );
-      introObserver.observe(intro);
+      revealOnScroll(intro, 0.8);
     }
   }
 
@@ -231,23 +254,8 @@ function initCases(prefersReducedMotion) {
     return;
   }
 
-  const revealOnIntersect = (el, threshold) => {
-    const observer = new IntersectionObserver(
-      (entries) => {
-        entries.forEach((entry) => {
-          if (entry.isIntersecting) {
-            el.classList.add('is-visible');
-            observer.unobserve(el);
-          }
-        });
-      },
-      { threshold }
-    );
-    observer.observe(el);
-  };
-
-  if (title) revealOnIntersect(title, 0.3);
-  if (carousel) revealOnIntersect(carousel, 0.15);
+  revealOnScroll(title, 0.8);
+  revealOnScroll(carousel, 0.85);
 }
 
 function initClosing(prefersReducedMotion) {
