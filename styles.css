@@ -184,6 +184,10 @@ a { text-decoration: none; color: inherit; }
 
 .hero-title .line:nth-child(1) span { animation-delay: 0.22s; }
 .hero-title .line:nth-child(2) span { animation-delay: 0.34s; }
+.hero-title .line:nth-child(3) span { animation-delay: 0.46s; }
+
+.hero-title-lines--desktop { display: contents; }
+.hero-title-lines--mobile { display: none; }
 
 .hero-media {
   position: relative;
@@ -815,6 +819,8 @@ a { text-decoration: none; color: inherit; }
 
   .hero-inner { padding: calc(var(--nav-h) + 32px) 20px 48px; }
   .hero-title { font-size: clamp(28px, 8vw, 36px); margin-bottom: 26px; }
+  .hero-title-lines--desktop { display: none; }
+  .hero-title-lines--mobile { display: contents; }
   .hero-media { width: 100%; height: auto; aspect-ratio: 527 / 231; }
   .hero-sub { font-size: 16px; margin-top: 22px; }
 
